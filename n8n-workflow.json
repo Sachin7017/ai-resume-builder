@@ -1,0 +1,456 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-resume-builder",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "fc02ba6d-d674-4222-bc09-bca52d293028",
+      "name": "Webhook",
+      "webhookId": "86a49ece-0679-48d6-b75a-35d91a39e396"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $json.body || $json;\n\nconst name = String(data.name || \"\").trim();\nconst email = String(data.email || \"\").trim();\n\nconst experienceRaw =\n  data.experience ??\n  data.years ??\n  data.yearsOfExperience ??\n  \"\";\n\nconst experienceText = String(experienceRaw).trim();\n\nconst skills = Array.isArray(data.skills)\n  ? data.skills.join(\", \")\n  : String(data.skills || \"\").trim();\n\nconst workExperience = String(\n  data.workExperience ||\n  data.experienceDetails ||\n  \"\"\n).trim();\n\nconst errors = [];\n\nif (!name) {\n  errors.push(\"Name is required.\");\n}\n\nconst emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\n\nif (!emailRegex.test(email)) {\n  errors.push(\"Please enter a valid email address.\");\n}\n\nif (experienceText === \"\" || isNaN(Number(experienceText))) {\n  errors.push(\"Years of experience must be a number.\");\n}\n\nif (!skills) {\n  errors.push(\"At least one skill is required.\");\n}\n\nif (!workExperience) {\n  errors.push(\"Work experience is required.\");\n}\n\nif (errors.length > 0) {\n  return [\n    {\n      json: {\n        success: false,\n        errors: errors\n      }\n    }\n  ];\n}\n\nreturn [\n  {\n    json: {\n      success: true,\n\n      // BASIC DETAILS\n      name: name,\n      role: data.role || \"\",\n      email: email,\n      phone: data.phone || \"\",\n      city: data.city || \"\",\n\n      // EXPERIENCE\n      experience: Number(experienceText),\n      workExperience: workExperience,\n\n      // SKILLS & EDUCATION\n      skills: skills,\n      education: data.education || \"\",\n\n      // OBJECTIVE\n      careerObjective:\n        data.careerObjective ||\n        data.summary ||\n        \"\",\n\n      // RESUME TYPE\n      resumeType:\n        data.resumeType ||\n        \"Professional Resume\",\n\n      // APPRENTICESHIP\n      apprenticeship:\n        data.apprenticeship ||\n        \"\",\n\n      apprenticeshipDuration:\n        data.apprenticeshipDuration ||\n        \"\",\n\n      // PROJECTS\n      projects:\n        data.projects ||\n        data.academicProjects ||\n        \"\",\n\n      // CERTIFICATIONS\n      certifications:\n        data.certifications ||\n        \"\",\n\n      // ACADEMIC DETAILS\n      academicDetails:\n        data.academicDetails ||\n        \"\",\n\n      // FIELD OF INTEREST\n      fieldOfInterest:\n        data.fieldOfInterest ||\n        data.fieldOfInterestDetails ||\n        \"\",\n\n      // LANGUAGES\n      languagesKnown:\n        data.languagesKnown ||\n        data.languages ||\n        \"\",\n\n      // STRENGTHS\n      strengths:\n        data.strengths ||\n        data.strength ||\n        \"\",\n\n      // PERSONAL DETAILS\n      fatherName:\n        data.fatherName ||\n        \"\",\n\n      dob:\n        data.dob ||\n        \"\",\n\n      gender:\n        data.gender ||\n        \"\",\n\n      maritalStatus:\n        data.maritalStatus ||\n        \"\",\n\n      nationality:\n        data.nationality ||\n        \"\",\n\n      // DECLARATION\n      declaration:\n        data.declaration ||\n        \"\",\n\n      place:\n        data.place ||\n        \"\",\n\n      date:\n        data.date ||\n        \"\"\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        0
+      ],
+      "id": "fd5b22ea-a7b3-4901-91f6-f7b9750bb911",
+      "name": "Validate Form"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5c2fc03f-5ce6-4414-b363-defee880f49d",
+              "leftValue": "true",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        336,
+        0
+      ],
+      "id": "c64fba3b-fa2e-422e-9eb3-165380e78dc6",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        2208,
+        -128
+      ],
+      "id": "79b1862d-7921-4db0-8441-c1a1c046ab6f",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        2096,
+        -64
+      ],
+      "id": "c9ba0274-3a19-443a-8ce2-79861ca3c769",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "hDmEDTQcKAN3fc0Y",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.1-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.1-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an expert professional resume writer.\n\nCreate a clean, professional, ATS-friendly resume using ONLY the candidate information provided below.\n\nCANDIDATE INFORMATION\n\nName:\n{{ $json.name }}\n\nEmail:\n{{ $json.email }}\n\nPhone:\n{{ $json.phone }}\n\nCity:\n{{ $json.city }}\n\nYears of Experience:\n{{ $json.experience }}\n\nSkills:\n{{ $json.skills }}\n\nEducation:\n{{ $json.education }}\n\nWork Experience:\n{{ $json.workExperience }}\n\nCareer Objective:\n{{ $json.careerObjective }}\n\nResume Type:\n{{ $json.resumeType }}\n\n\nFORMAT THE RESUME EXACTLY LIKE THIS:\n\nCANDIDATE NAME\n\nProfessional Title\n\nEmail | Phone | City\n\n\nPROFESSIONAL SUMMARY\n\nWrite a short professional summary using only the information provided.\n\n\nWORK EXPERIENCE\n\nFor each work experience:\nJob Title | Company\nDuration\n\n• Responsibility or achievement\n• Responsibility or achievement\n• Responsibility or achievement\n\n\nSKILLS\n\n• Skill\n• Skill\n• Skill\n\n\nEDUCATION\n\nDegree / Course\nInstitution\nYear or other provided details\n\n\nPROJECTS\n\nInclude relevant projects only if project information is provided.\n\n\nACHIEVEMENTS\n\nInclude achievements only if they are provided.\n\n\nFORMATTING RULES\n\n- Use clear section headings in CAPITAL LETTERS.\n- Keep the resume clean and professional.\n- Use bullet points for responsibilities and skills.\n- Keep each section separated by a blank line.\n- Keep sentences concise.\n- Do not use tables.\n- Do not use emojis.\n- Do not use markdown symbols such as #, **, or ---.\n- Do not add information that was not provided.\n- Do not invent companies, dates, achievements, technologies, or qualifications.\n- Improve grammar and wording while keeping the original meaning.\n- Return ONLY the final resume content.\nFINAL FORMATTING:\n\n- Put the candidate name on the first line.\n- Put the professional title on the second line.\n- Put email, phone and city on the third line.\n- Leave one blank line after contact details.\n- Write every section heading in CAPITAL LETTERS.\n- Leave one blank line before every section heading.\n- Use bullet points beginning with \"•\" for skills and responsibilities.\n- Keep each job title on its own line.\n- Keep company and duration on the next line.\n- Do not use Markdown.\n- Do not use #, **, or markdown headings.\n- Do not use tables.\n- Do not use emojis.\n- Return only the final resume."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        -96
+      ],
+      "id": "3a7b6c2d-fec5-446a-9866-f8d6ee349696",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "lHDg9sR4V5Hq6Aj9",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "1zKt6CyOXLOLqgZ0ictYtlRNoc8nmjXbhrbbGSQeJ61Q",
+          "mode": "id"
+        },
+        "name": "={{ \"Resume - \" + $('Validate Form').first().json.name }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        928,
+        -96
+      ],
+      "id": "d4bc04f8-f406-479c-895c-37d7e8fbf637",
+      "name": "Copy file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "cZ7vJtgOx5Yx3xhF",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $('Copy file').first().json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "replaceAll",
+              "text": "[FULL NAME]",
+              "replaceText": "={{ $('Validate Form').first().json.name }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[PHONE]",
+              "replaceText": "={{ $('Validate Form').first().json.phone }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[EMAIL]",
+              "replaceText": "={{ $('Validate Form').first().json.email }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[CITY / ADDRESS]",
+              "replaceText": "={{ $('Validate Form').first().json.city }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[Write a concise career objective here.]",
+              "replaceText": "={{ $('Validate Form').first().json.careerObjective }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[Company / Organization]",
+              "replaceText": "={{ $('Validate Form').first().json.apprenticeship }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[Start Date – End Date]",
+              "replaceText": "={{ $('Validate Form').first().json.apprenticeshipDuration }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[PROJECTS]",
+              "replaceText": "={{ $('Prepare Resume Fields').first().json.formattedProjects }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[CERTIFICATIONS]",
+              "replaceText": "={{ $('Prepare Resume Fields').first().json.formattedCertifications }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[ACADEMIC DETAILS]",
+              "replaceText": "={{ $('Prepare Resume Fields').first().json.formattedAcademicDetails }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": " [Field of Interest]",
+              "replaceText": "={{ $('Prepare Resume Fields').first().json.formattedInterests }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[SKILLS]",
+              "replaceText": "={{ $('Prepare Resume Fields').first().json.formattedSkills }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[STRENGTHS]",
+              "replaceText": "={{ $('Prepare Resume Fields').first().json.formattedStrengths }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[FATHER’S NAME]",
+              "replaceText": "={{ $('Validate Form').first().json.fatherName }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[DD/MM/YYYY]",
+              "replaceText": "={{ $('Validate Form').first().json.dob }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[GENDER]",
+              "replaceText": "={{ $('Validate Form').first().json.gender }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[MARITAL STATUS]",
+              "replaceText": "={{ $('Validate Form').first().json.maritalStatus }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[NATIONALITY]",
+              "replaceText": "={{ $('Validate Form').first().json.nationality }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[LANGUAGES]",
+              "replaceText": "={{ $('Validate Form').first().json.languagesKnown }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[Declaration statement.]",
+              "replaceText": "={{ $('Validate Form').first().json.declaration }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[PLACE]",
+              "replaceText": "={{ $('Validate Form').first().json.place }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "[DATE]",
+              "replaceText": "={{ $('Validate Form').first().json.date }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        800,
+        144
+      ],
+      "id": "853a76fb-325a-4ed8-85b0-51241f6e4330",
+      "name": "Update a document1",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "b4A20H7XI0oAZSk4",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $('Validate Form').first().json;\n\n// Skills\nconst skills = String(data.skills || '')\n  .split(',')\n  .map(s => s.trim())\n  .filter(Boolean)\n  .map(s => `• ${s}`)\n  .join('\\n');\n\n// Strengths\nconst strengths = String(data.strengths || '')\n  .split(',')\n  .map(s => s.trim())\n  .filter(Boolean)\n  .map(s => `• ${s}`)\n  .join('\\n');\n\n// Field of Interest\nconst interests = String(data.fieldOfInterest || '')\n  .split(',')\n  .map(s => s.trim())\n  .filter(Boolean)\n  .map(s => `• ${s}`)\n  .join('\\n');\n\n// Certifications\nconst certifications = String(data.certifications || '')\n  .split('\\n')\n  .map(s => s.trim())\n  .filter(Boolean)\n  .map(s => `• ${s}`)\n  .join('\\n');\n\n// Projects\nconst projects = String(data.projects || '')\n  .split('\\n')\n  .map(s => s.trim())\n  .filter(Boolean)\n  .map(s => `• ${s}`)\n  .join('\\n');\n\n// Academic Details\nconst academicDetails = String(data.academicDetails || '')\n  .split('\\n')\n  .map(s => s.trim())\n  .filter(Boolean)\n  .join('\\n');\n\nreturn [\n  {\n    json: {\n      ...data,\n\n      formattedSkills: skills,\n      formattedStrengths: strengths,\n      formattedInterests: interests,\n      formattedCertifications: certifications,\n      formattedProjects: projects,\n      formattedAcademicDetails: academicDetails\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        144
+      ],
+      "id": "6129f696-b82c-433f-88f3-34b180886cc1",
+      "name": "Prepare Resume Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "const docId = $('Copy file').first().json.id;\n\nconst resumeUrl =\n  'https://docs.google.com/document/d/' + docId + '/edit';\n\nreturn [\n  {\n    json: {\n      ...$json,\n      resumeUrl: resumeUrl\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        144
+      ],
+      "id": "875b3c51-520f-4f32-8b3f-750dbbf4e05f",
+      "name": "Generate Resume Link1"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Validate Form').first().json.email }}",
+        "subject": "Your AI Resume is Ready 🚀",
+        "message": "=={{\n`<div style=\"font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:30px;background:#f8fafc;color:#1e293b\">\n\n  <h2 style=\"margin-bottom:10px;\">\n    Your Resume is Ready 🚀\n  </h2>\n\n  <p>Hello ${$('Validate Form').first().json.name || ''},</p>\n\n  <p>\n    Your professional resume has been successfully created using our\n    AI Resume Builder.\n  </p>\n\n  <div style=\"margin:30px 0;text-align:center;\">\n    <a\n      href=\"${$json.resumeUrl}\"\n      style=\"display:inline-block;padding:14px 25px;background:#111827;color:white;text-decoration:none;border-radius:8px;font-weight:bold;\"\n    >\n      View My Resume\n    </a>\n  </div>\n\n  <p>\n    You can open your resume anytime using the button above.\n  </p>\n\n  <p style=\"margin-top:30px;color:#64748b;font-size:13px;\">\n    This is an automated email from AI Resume Builder.\n  </p>\n\n</div>`\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1248,
+        144
+      ],
+      "id": "aa13f2f4-1894-4b98-9c3f-d04ab5ec1abb",
+      "name": "Send a message",
+      "webhookId": "cb77117d-864a-456e-801b-c156df0a99f8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "91ZfIIDQPnXxLtrZ",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Form": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Copy file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copy file": {
+      "main": [
+        [
+          {
+            "node": "Prepare Resume Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a document1": {
+      "main": [
+        [
+          {
+            "node": "Generate Resume Link1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Resume Fields": {
+      "main": [
+        [
+          {
+            "node": "Update a document1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Resume Link1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "85856774-94e6-4422-80b2-cd0fd4d12e4d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3b6baeed443eb6ff9bc4e432c6f680e504664ee54781e444f2bda7a1db2858dd"
+  },
+  "nodeGroups": [],
+  "id": "EcSP9N3wVIyA53la",
+  "tags": []
+}
