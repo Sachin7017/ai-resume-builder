@@ -2,6 +2,12 @@
 
 An AI-powered resume builder that generates professional resumes using Google Gemini and n8n automation.
 
+## n8n Automation Workflow
+
+The complete resume generation process is automated using n8n.
+
+![n8n Workflow](screenshots/n8n-workflow.png)
+
 ## Features
 
 - Custom resume builder form
